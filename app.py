@@ -2,9 +2,29 @@ import streamlit as st
 import pandas as pd
 import faiss
 import os
+import urllib.request
 from sentence_transformers import SentenceTransformer, CrossEncoder
 from google import genai
 from google.genai import types
+
+# Enlaces de descarga directa que obtuviste de tu Dropbox/OneDrive
+URL_DATAFRAME = "https://drive.google.com/file/d/1iaftxRYn9L46GQr2OYWJxzYS_KRUjuuj/view?usp=drive_link"
+URL_FAISS = "https://drive.google.com/file/d/1ylPLC8H_wrU8rdwbOZgCniDHWp2d1AZQ/view?usp=drive_link"
+
+@st.cache_resource
+def descargar_archivos_pesados():
+    # Descargar DataFrame si no existe localmente
+    if not os.path.exists("arxiv_clean_df.pkl"):
+        with st.spinner("Descargando base de datos científica (esto ocurre solo una vez)..."):
+            urllib.request.urlretrieve(URL_DATAFRAME, "arxiv_clean_df.pkl")
+            
+    # Descargar Índice FAISS si no existe localmente
+    if not os.path.exists("faiss_arxiv_index.bin"):
+        with st.spinner("Descargando índice de vectores..."):
+            urllib.request.urlretrieve(URL_FAISS, "faiss_arxiv_index.bin")
+
+# Ejecutar la descarga antes de cargar los componentes
+descargar_archivos_pesados()
 
 # 1. Configuración de seguridad de la API Key (Requerimiento H)
 # Intentará leer la clave secreta desde las variables de entorno del servidor en la nube
