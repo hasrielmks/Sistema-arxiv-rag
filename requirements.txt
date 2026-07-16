@@ -1,0 +1,7 @@
+streamlit
+kagglehub
+pandas
+numpy
+faiss-cpu
+sentence-transformers
+google-genai
