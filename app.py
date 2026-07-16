@@ -3,13 +3,14 @@ import pandas as pd
 import faiss
 import os
 import urllib.request
+import gdown
 from sentence_transformers import SentenceTransformer, CrossEncoder
 from google import genai
 from google.genai import types
 
 # Enlaces de descarga directa que obtuviste de tu Dropbox/OneDrive
-URL_DATAFRAME = "https://drive.google.com/file/d/1iaftxRYn9L46GQr2OYWJxzYS_KRUjuuj/view?usp=drive_link"
-URL_FAISS = "https://drive.google.com/file/d/1ylPLC8H_wrU8rdwbOZgCniDHWp2d1AZQ/view?usp=drive_link"
+URL_DATAFRAME = "https://drive.google.com/file/d/1iaftxRYn9L46GQr2OYWJxzYS_KRUjuuj/"
+URL_FAISS = "https://drive.google.com/file/d/1ylPLC8H_wrU8rdwbOZgCniDHWp2d1AZQ/"
 
 @st.cache_resource
 def descargar_archivos_pesados():
