@@ -9,8 +9,8 @@ from google import genai
 from google.genai import types
 
 # Enlaces de descarga directa que obtuviste de tu Dropbox/OneDrive
-URL_DATAFRAME = "https://drive.google.com/file/d/1iaftxRYn9L46GQr2OYWJxzYS_KRUjuuj/"
-URL_FAISS = "https://drive.google.com/file/d/1ylPLC8H_wrU8rdwbOZgCniDHWp2d1AZQ/"
+URL_DATAFRAME = "1iaftxRYn9L46GQr2OYWJxzYS_KRUjuuj"
+URL_FAISS = "1ylPLC8H_wrU8rdwbOZgCniDHWp2d1AZQ"
 
 @st.cache_resource
 def descargar_archivos_pesados():
@@ -45,17 +45,32 @@ if not GEMINI_API_KEY:
 # Inicializar cliente de Gemini de forma segura
 client = genai.Client(api_key=GEMINI_API_KEY)
 
-# 2. Carga optimizada de Modelos y Datos con caché de Streamlit
 @st.cache_resource
-def inicializar_componentes():
-    # Modelos de recuperación y ordenamiento
+def inicializar_todo():
+    # 1. Borrar archivos corruptos si existen (si pesan muy poco o son HTML)
+    for archivo in ["arxiv_clean_df.pkl", "faiss_arxiv_index.bin"]:
+        if os.path.exists(archivo):
+            # Si el archivo pesa menos de 1 MB, significa que se descargó una página HTML de error
+            if os.path.getsize(archivo) < 1024 * 1024:
+                os.remove(archivo)
+
+    # 2. Descargar usando el parámetro 'id=' de gdown (Salta el aviso de virus de Drive)
+    if not os.path.exists("arxiv_clean_df.pkl"):
+        with st.spinner("Descargando base de datos desde Google Drive..."):
+            gdown.download(id=ID_DATAFRAME, output="arxiv_clean_df.pkl", quiet=False)
+            
+    if not os.path.exists("faiss_arxiv_index.bin"):
+        with st.spinner("Descargando índice de vectores desde Google Drive..."):
+            gdown.download(id=ID_FAISS, output="faiss_arxiv_index.bin", quiet=False)
+
+    # 3. Cargar modelos y datos en memoria
     embed_mod = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
     rerank_mod = CrossEncoder('cross-encoder/ms-marco-MiniLM-L-6-v2')
-    # Carga de los archivos que exportamos desde Colab
     datos_df = pd.read_pickle("arxiv_clean_df.pkl")
     indice_faiss = faiss.read_index("faiss_arxiv_index.bin")
-    return embed_mod, rerk_mod, datos_df, indice_faiss
-
+    
+    return embed_mod, rerank_mod, datos_df, indice_faiss
+    
 embedding_model, reranker_model, df, index = inicializar_componentes()
 
 # 3. Gestión del historial del Chat (Requerimiento G)
